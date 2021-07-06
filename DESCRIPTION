@@ -2,7 +2,7 @@ Package: pcoxtime
 Type: Package
 Title: Penalized Cox Proportional Hazard Model for Time-Dependent
         Covariates
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(person("Bicko","Cygu", role=c("aut","cre"),
 				email="cygubicko@gmail.com",
             comment=c(ORCID = "0000-0002-9284-8863")),
@@ -20,9 +20,9 @@ Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://github.com/CYGUBICKO/pcoxtime-pkg
 NeedsCompilation: yes
-Packaged: 2021-03-26 19:06:07 UTC; steve
+Packaged: 2021-07-06 15:40:39 UTC; steve
 Author: Bicko Cygu [aut, cre] (<https://orcid.org/0000-0002-9284-8863>),
   Ben Bolker [aut] (<https://orcid.org/0000-0002-2127-0443>)
 Maintainer: Bicko Cygu <cygubicko@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-03-28 05:20:03 UTC
+Date/Publication: 2021-07-06 16:10:05 UTC

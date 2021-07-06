@@ -2,10 +2,10 @@
 #'
 #' This function prints a summary of the pcoxtime object.
 #'
-#' @details The call that produced \code{\link[pcoxtime]{pcoxtime}} is printed, followed by coefficient estimates with their corresponding exponentiated values. 
+#' @details The call that produced \code{\link[pcoxtime]{pcoxtime}} is printed, followed by coefficient estimates with their corresponding exponentiated values.
 #' Depending on the number of coefficients, \code{nprint} can be used to specify the number of coefficients to print out.
 #'
-#' @param x fitted \code{\link[pcoxtime]{pcoxtime}} model object 
+#' @param x fitted \code{\link[pcoxtime]{pcoxtime}} model object
 #' @param ... for future implementations
 #' @param nprint number of coefficients to print out
 #'
@@ -13,7 +13,6 @@
 #'
 #' @method print pcoxtime
 #' @export
-#' @export print.pcoxtime
 print.pcoxtime <- function(x, ..., nprint = 10){
 	cat("Call:\n")
 	print(x$call)
@@ -39,22 +38,41 @@ print.pcoxtime <- function(x, ..., nprint = 10){
 #'
 #' @method print pcoxsurvfit
 #' @export
-#' @export print.pcoxsurvfit
 print.pcoxsurvfit <- function(x, ...){
-	if (!inherits(x, "pcoxbasehaz")){
-		cat("Call:\n")
-		print(x$call)
-		out <- data.frame(cbind(n = x$n, events = sum(x$events)))
-		print(out, row.names = FALSE, ...)
-		cat("\n")
-	}
+	cat("Call:\n")
+	print(x$call)
+	out <- data.frame(cbind(n = x$n, events = sum(x$events)))
+	print(out, row.names = FALSE, ...)
+	cat("\n")
+}
+
+#' Print baseline hazard function data frame
+#'
+#' Print the head of baseline hazard function data frame.
+#'
+#' @details Provide a summary of \code{\link[pcoxtime]{pcoxbasehaz.pcoxtime}} object.
+#'
+#' @param x the result of a call to the \code{\link[pcoxtime]{pcoxbasehaz.pcoxtime}} function.
+#' @param n number of rows to print. Default is 5.
+#' @param ... for future implementations
+#'
+#' @return The call to the \code{\link[pcoxtime]{pcoxbasehaz.pcoxtime}} and the head of baseline hazard function data frame.
+#'
+#' @method print pcoxbasehaz
+#' @export
+print.pcoxbasehaz <- function(x, n=5, ...){
+	cat("Call:\n")
+	print(x$call)
+	out <- data.frame(time=x$time, hazard=x$hazard, surv=x$surv)
+	print(head(out, n=n), row.names = FALSE, ...)
+	cat("\n")
 }
 
 #' Print cross-validated pcoxtime object
 #'
 #' Print the summary of the result of cross-validation for a pcoxtime object.
 #'
-#' @details 
+#' @details
 #' A summary of optimal lambda and alpha for training pcoxtime model.
 #'
 #' @param x \code{\link[pcoxtime]{pcoxtimecv}} object
@@ -64,7 +82,6 @@ print.pcoxsurvfit <- function(x, ...){
 #'
 #' @method print pcoxtimecv
 #' @export
-#' @export print.pcoxtimecv
 print.pcoxtimecv <- function(x, ...){
 	cat("Call:\n")
 	print(x$call)
@@ -74,32 +91,75 @@ print.pcoxtimecv <- function(x, ...){
 	cat("\n")
 }
 
-#' Extract coefficient estimates of pcoxtime object
+#' Extract coefficient estimates of pcoxtimecv object
 #' 
+#' This function extracts cross-validation estimates for a particular lambda.
+#'
+#' @details Extract the coefficient estimates for optimal lambda-alpha pair or based on specified the value of lambda for an optimal alpha. If the value of lambda specified is not exact (not in lambdas), the nearest value is used, based on \code{nearest <- function(values, value){values[which(abs(values-value)==min(abs(values-value)))]}}. It requires that \code{\link[pcoxtime]{pcoxtimecv}} is run with \code{refit = TRUE}.
+#'
+#' @param object \code{\link[pcoxtime]{pcoxtimecv}} object
+#' @param lambda the value of lambda for which to return the coefficient estimates. It can be any of the character string, "min", "optimal" or "best" for optimal lambda; "1se" for 1 standard error lambda; or any numeric value for lambda. See details.
+#' @param ... for future implementations
+#'
+#' @return A data frame of coefficient estimates.
+#'
+#' @method coef pcoxtimecv
+#' @export
+#' @importFrom utils head
+coef.pcoxtimecv <- function(object, lambda, ...){
+	betas <- object$fit$beta
+	if (is.null(betas))stop("Run pcoxtimecv with refit = TRUE to extract coefficients")
+	nearest <- function(values, value){
+		values[which(abs(values-value)==min(abs(values-value)))]
+	}
+	if (missing(lambda)) lambda <- "min"
+	if (lambda=="min" | lambda=="optimal" | lambda=="best") {
+		lambda <- object$lambda.min
+	} else if (lambda=="1se") {
+		lambda <- object$lambda.1se
+	}
+	values <- unique(betas$lambda)
+	lambda <- nearest(values, lambda)
+	betas <- betas[betas$lambda==lambda, ]
+	return(betas)
+}
+
+#' Extract coefficient estimates of pcoxtimecv object
+#' 
+#' @return A vector of coefficient estimates.
+#'
+#' @method coefficients pcoxtimecv
+#' @rdname coef.pcoxtimecv
+#' @export 
+coefficients.pcoxtimecv <- function(object, lambda, ...){
+	return(coef.pcoxtimecv(object, lambda, ...))
+}
+
+
+#' Extract coefficient estimates of pcoxtime object
+#'
 #' This function extracts the estimates for all the coefficients.
 #'
-#' @details The call that produced \code{\link[pcoxtime]{pcoxtime}} is printed, followed by coefficient estimates. 
+#' @details The call that produced \code{\link[pcoxtime]{pcoxtime}} is printed, followed by coefficient estimates.
 #'
-#' @param object fitted \code{\link[pcoxtime]{pcoxtime}} model object 
+#' @param object fitted \code{\link[pcoxtime]{pcoxtime}} model object
 #' @param ... for future implementations
 #'
 #' @return A vector of coefficient estimates.
 #'
 #' @method coef pcoxtime
 #' @export
-#' @export coef.pcoxtime
 coef.pcoxtime <- function(object, ...){
 	return(drop(object$coef))
 }
 
 #' Extract coefficient estimates of pcoxtime object
-#' 
+#'
 #' @return A vector of coefficient estimates.
 #'
 #' @method coefficients pcoxtime
 #' @rdname coef.pcoxtime
-#' @export 
-#' @export coefficients.pcoxtime
+#' @export
 coefficients.pcoxtime <- function(object, ...){
 	return(drop(object$coef))
 }
@@ -112,3 +172,6 @@ pcoxbasehaz <- function(fit, centered = TRUE) UseMethod("pcoxbasehaz")
 
 #' @export
 concordScore <- function(fit, newdata = NULL, stats = FALSE, reverse = TRUE, ...) UseMethod("concordScore")
+
+#' @export
+extractoptimal <- function(object, what=c("optimal", "cvm", "coefs"), ...) UseMethod("extractoptimal")
