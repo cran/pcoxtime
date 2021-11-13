@@ -52,7 +52,7 @@
 #' @references 
 #' Dai, B., and Breheny, P. (2019). \emph{Cross validation approaches for penalized Cox regression}. \emph{arXiv preprint arXiv:1905.10432}.
 #'
-#'Simon, N., Friedman, J., Hastie, T., Tibshirani, R. (2011) \emph{Regularization Paths for Cox's Proportional Hazards Model via Coordinate Descent, Journal of Statistical Software, Vol. 39(5) 1-13} \url{https://www.jstatsoft.org/v39/i05/}
+#'Simon, N., Friedman, J., Hastie, T., Tibshirani, R. (2011) \emph{Regularization Paths for Cox's Proportional Hazards Model via Coordinate Descent, Journal of Statistical Software, Vol. 39(5) 1-13} \doi{https://doi.org/10.18637/jss.v039.i05}.
 #'
 #' @examples
 #'
@@ -129,9 +129,17 @@ pcoxtimecv <- function(formula, data, alphas = 1, lambdas = NULL
 	
 	if(lamfract<0.5 | lamfract > 1)stop("Choose lamfract between 0.5 and 1")
 	if(!is.null(colnames(X))){xnames = colnames(X)}else{xnames = paste0("X", 1:p)}
-	if (any(alphas > 1) | any(alphas < 0))stop("Choose alphas between 0 to 1.")
-	# Reset alpha if > 1
-	if (length(alphas)==1 && any(alphas > 1)){alphas_old <- alphas; alphas <- 1} else{alphas_old <- alphas}
+	
+	if (any(alphas>1) | any(alphas < 0)) {
+		if (length(alphas) > 1){
+			stop("Choose alphas between 0 to 1.")
+		} else {
+			# Reset alpha if > 1 or  < 0
+			alphas <- 1
+			warning("alphas >1 | alphas < 0; setting to default: alphas = 1")
+		}
+	}
+
 	if(!is.null(lambdas) && length(lambdas)<2)stop("Need more than one value of lambda for cross-validation.")
 	if(nclusters < 1)stop("Number of clusters must be at least 1.")
 	if(!is.null(lambdas)) nlambdas <- length(lambdas)
